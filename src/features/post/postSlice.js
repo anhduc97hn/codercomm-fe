@@ -59,6 +59,28 @@ const slice = createSlice({
       const { postId, reactions } = action.payload;
       state.postsById[postId].reactions = reactions;
     },
+
+    deletePostSuccess(state, action) {
+      state.isLoading = false;
+      state.error = null;
+      // filter current posts array & remove current post in postsById
+      const deletedPost = action.payload;
+      state.currentPagePosts = state.currentPagePosts.filter(
+        (postId) => postId !== deletedPost._id
+      );
+      delete state.postsById[deletedPost._id];
+    },
+
+    editPostSuccess(state, action) {
+      state.isLoading = false;
+      state.error = null;
+      // replace current post with updated post
+    
+      const updatedPost = action.payload;
+      if (state.currentPagePosts.find((postId) => postId === updatedPost._id)) {
+        state.postsById[updatedPost._id] = updatedPost;
+      }
+    },
   },
 });
 
@@ -122,3 +144,41 @@ export const sendPostReaction =
       toast.error(error.message);
     }
   };
+
+  export const deletePost =
+    (postId) =>
+    async (dispatch) => {
+      dispatch(slice.actions.startLoading());
+      try {
+        const response = await apiService.delete(`/posts/${postId}`);
+        dispatch(slice.actions.deletePostSuccess(response.data));
+        toast.success("Post deleted!");
+        dispatch(getCurrentUserProfile());
+      } catch (error) {
+        dispatch(slice.actions.hasError(error.message));
+        toast.error(error.message);
+      }
+    };
+
+    export const editPost =
+      ({ updatedPostId, data }) =>
+      async (dispatch) => {
+        dispatch(slice.actions.startLoading());
+        try {
+          const { content, image } = data;
+          // upload image to cloudinary
+          if (typeof image !== "string") {
+            const imageUrl = await cloudinaryUpload(image);
+            data.image = imageUrl;
+          }
+          const response = await apiService.put(`/posts/${updatedPostId}`, {
+            ...data
+          });
+          dispatch(slice.actions.editPostSuccess(response.data));
+          toast.success("Post edited!");
+        } catch (error) {
+          dispatch(slice.actions.hasError(error.message));
+          toast.error(error.message);
+          console.log("error", error);
+        }
+      };

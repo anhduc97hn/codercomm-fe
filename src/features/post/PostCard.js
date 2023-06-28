@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Link,
@@ -8,6 +8,9 @@ import {
   Typography,
   CardHeader,
   IconButton,
+  Menu,
+  Divider,
+  MenuItem,
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { fDate } from "../../utils/formatTime";
@@ -16,8 +19,73 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import PostReaction from "./PostReaction";
 import CommentForm from "../comment/CommentForm";
 import CommentList from "../comment/CommentList";
+import { useDispatch } from "react-redux";
+import { deletePost } from "./postSlice";
 
-function PostCard({ post }) {
+function PostCard({ post, setCurrentPost, postFormRef}) {
+
+  const dispatch = useDispatch();
+  const postId = post._id; 
+
+
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const isMenuOpen = Boolean(anchorEl);
+
+  const handlePostOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleEditPost = (postId) => {
+   
+    window.scrollTo({
+      top: postFormRef.current.offsetTop,
+      behavior: "smooth"
+    })
+    setCurrentPost(postId);
+    handleMenuClose();
+  };
+
+  const handleDeletePost = (postId) => {
+    const res = window.confirm("Are you sure you want to delete this post?");
+
+    if (res) {
+      dispatch(deletePost(postId));
+    }
+    return;
+  };
+
+  const menuId = "primary-post-menu";
+
+  const renderMenu = (
+    <Menu
+      anchorEl={anchorEl}
+      anchorOrigin={{
+        vertical: "bottom",
+        horizontal: "right",
+      }}
+      id={menuId}
+      keepMounted
+      transformOrigin={{
+        vertical: "top",
+        horizontal: "right",
+      }}
+      open={isMenuOpen}
+      onClose={handleMenuClose}
+    >
+      <MenuItem onClick={() => handleEditPost(postId)} sx={{ m: 1 }}>
+        Edit
+      </MenuItem>
+      <MenuItem onClick={() => handleDeletePost(postId)} sx={{ m: 1 }}>
+        Delete
+      </MenuItem>
+    </Menu>
+  ); 
+
   return (
     <Card>
       <CardHeader
@@ -46,11 +114,11 @@ function PostCard({ post }) {
         }
         action={
           <IconButton>
-            <MoreVertIcon sx={{ fontSize: 30 }} />
+            <MoreVertIcon sx={{ fontSize: 30 }} onClick={handlePostOpen} />
           </IconButton>
         }
       />
-
+      {renderMenu}
       <Stack spacing={2} sx={{ p: 3 }}>
         <Typography>{post.content}</Typography>
 
@@ -60,7 +128,7 @@ function PostCard({ post }) {
               borderRadius: 2,
               overflow: "hidden",
               height: 300,
-              "& img": { objectFit: "cover", width: 1, height: 1 },
+              "& img": { objectFit: "contain", width: 1, height: 1 },
             }}
           >
             <img src={post.image} alt="post" />

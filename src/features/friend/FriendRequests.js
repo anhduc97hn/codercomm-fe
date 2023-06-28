@@ -7,9 +7,11 @@ import {
   Pagination,
   Grid,
   Container,
+  IconButton,
+  Button,
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
-import { getFriendRequests } from "./friendSlice";
+import { getFriendRequests, getRequestsSent } from "./friendSlice";
 import UserCard from "./UserCard";
 import SearchInput from "../../components/SearchInput";
 
@@ -25,6 +27,10 @@ function FriendRequests() {
 
   const handleSubmit = (searchQuery) => {
     setFilterName(searchQuery);
+  };
+
+  const handleClick = () => {
+    dispatch(getRequestsSent({filterName, page}))
   };
 
   useEffect(() => {
@@ -58,6 +64,14 @@ function FriendRequests() {
               onChange={(e, page) => setPage(page)}
             />
           </Stack>
+          <Button sx={{width: "auto", alignSelf: "flex-start"}} onClick={handleClick}>
+          <Typography
+              variant="subtitle"
+              sx={{ color: "text.secondary", ml: 1 }}
+            >
+              View Requests Sent
+            </Typography>
+            </Button>
         </Stack>
 
         <Grid container spacing={3} my={1}>

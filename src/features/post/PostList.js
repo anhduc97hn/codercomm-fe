@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import PostCard from "./PostCard";
 import { getPosts } from "./postSlice";
 
-function PostList({ userId }) {
+function PostList({ userId, setCurrentPost, postFormRef }) {
   const [page, setPage] = useState(1);
   const { currentPagePosts, postsById, isLoading, totalPosts } = useSelector(
     (state) => state.post
@@ -20,7 +20,7 @@ function PostList({ userId }) {
   return (
     <>
       {posts.map((post) => (
-        <PostCard key={post._id} post={post} />
+        <PostCard key={post._id} post={post} setCurrentPost={setCurrentPost} postFormRef={postFormRef} />
       ))}
       <Box sx={{ display: "flex", justifyContent: "center" }}>
         {totalPosts ? (

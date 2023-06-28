@@ -5,9 +5,13 @@ import PostForm from "../post/PostForm";
 import ProfileScorecard from "./ProfileScorecard";
 import PostList from "../post/PostList";
 import useAuth from "../../hooks/useAuth";
+import { useRef, useState } from "react";
 
 function Profile({ profile }) {
   const { user } = useAuth();
+  const [currentPost, setCurrentPost] = useState(null);
+  const postFormRef = useRef();
+
   return (
     <Grid container spacing={3}>
       <Grid item xs={12} md={4}>
@@ -20,8 +24,8 @@ function Profile({ profile }) {
 
       <Grid item xs={12} md={8}>
         <Stack spacing={3}>
-          {user._id === profile._id && <PostForm />}
-          <PostList userId={profile._id} />
+          {user._id === profile._id &&  <PostForm currentPost={currentPost} setCurrentPost={setCurrentPost} postFormRef={postFormRef} />}
+          <PostList userId={profile._id} setCurrentPost={setCurrentPost} postFormRef={postFormRef} />
         </Stack>
       </Grid>
     </Grid>
